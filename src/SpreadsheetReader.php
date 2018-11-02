@@ -1,7 +1,11 @@
 <?php
+/**
+ * @noinspection PhpUnhandledExceptionInspection
+ */
 
 namespace Port\Spreadsheet;
 
+use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use Port\Reader\CountableReader;
 
@@ -43,21 +47,24 @@ class SpreadsheetReader implements CountableReader, \SeekableIterator
     protected $count;
 
     /**
-     * @param \SplFileObject $file            Excel file
-     * @param integer        $headerRowNumber Optional number of header row
-     * @param integer        $activeSheet     Index of active sheet to read from
-     * @param boolean        $readOnly        If set to false, the reader take care of the excel formatting (slow)
-     * @param integer        $maxRows         Maximum number of rows to read
+     * @param string $filename Excel file
+     * @param integer $headerRowNumber Optional number of header row
+     * @param integer $activeSheet Index of active sheet to read from
+     * @param boolean $readOnly If set to false, the reader take care of the excel formatting (slow)
+     * @param integer $maxRows Maximum number of rows to read
      */
-    public function __construct(\SplFileObject $file, $headerRowNumber = null, $activeSheet = null, $readOnly = true, $maxRows = null)
-    {
+    public function __construct(
+        $filename,
+        $headerRowNumber = null,
+        $activeSheet = null,
+        $readOnly = true,
+        $maxRows = null
+    ) {
+        /** @var Xlsx $reader */
         $reader = \PhpOffice\PhpSpreadsheet\IOFactory::createReader("Xlsx");
-        $spreadsheet = $reader->load($file->getPathname());
-//        $reader = \PHPExcel_IOFactory::createReaderForFile($file->getPathName());
-//        $reader->setReadDataOnly($readOnly);
-//        /** @var \PHPExcel $spreadsheet */
+        $reader->setReadDataOnly($readOnly);
         /** @var Spreadsheet $spreadsheet */
-        $spreadsheet = $reader->load($file->getPathname());
+        $spreadsheet = $reader->load($filename);
 
         if (null !== $activeSheet) {
             $spreadsheet->setActiveSheetIndex($activeSheet);
@@ -85,7 +92,7 @@ class SpreadsheetReader implements CountableReader, \SeekableIterator
      */
     public function current()
     {
-        $row = $this->worksheet[$this->pointer];
+        $row = $this->worksheet[ $this->pointer ];
 
         // If the CSV has column headers, use them to construct an associative
         // array for the columns in this line
@@ -99,6 +106,7 @@ class SpreadsheetReader implements CountableReader, \SeekableIterator
             // Else just return the column values
             return $row;
         }
+        return [];
     }
 
     /**
@@ -145,7 +153,7 @@ class SpreadsheetReader implements CountableReader, \SeekableIterator
     public function setHeaderRowNumber($rowNumber)
     {
         $this->headerRowNumber = $rowNumber;
-        $this->columnHeaders = $this->worksheet[$rowNumber];
+        $this->columnHeaders = $this->worksheet[ $rowNumber ];
     }
 
     /**
@@ -161,7 +169,7 @@ class SpreadsheetReader implements CountableReader, \SeekableIterator
      */
     public function valid()
     {
-         return isset($this->worksheet[$this->pointer]);
+        return isset($this->worksheet[ $this->pointer ]);
     }
 
     /**
