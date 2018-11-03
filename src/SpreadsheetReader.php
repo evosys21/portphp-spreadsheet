@@ -49,7 +49,7 @@ class SpreadsheetReader implements CountableReader, \SeekableIterator
     /**
      * @param string $filename Excel file
      * @param integer $headerRowNumber Optional number of header row
-     * @param integer $activeSheet Index of active sheet to read from
+     * @param integer|number $activeSheet Index of active sheet to read from
      * @param boolean $readOnly If set to false, the reader take care of the excel formatting (slow)
      * @param integer $maxRows Maximum number of rows to read
      */
@@ -67,7 +67,11 @@ class SpreadsheetReader implements CountableReader, \SeekableIterator
         $spreadsheet = $reader->load($filename);
 
         if (null !== $activeSheet) {
-            $spreadsheet->setActiveSheetIndex($activeSheet);
+            if (is_string($activeSheet)) {
+                $spreadsheet->setActiveSheetIndexByName($activeSheet);
+            } else {
+                $spreadsheet->setActiveSheetIndex($activeSheet);
+            }
         }
         $sheet = $spreadsheet->getActiveSheet();
 
