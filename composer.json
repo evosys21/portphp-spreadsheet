@@ -28,7 +28,7 @@
     },
     "require": {
         "php": ">=5.4.0",
-        "portphp/portphp": "^1.3",
+        "evosys/portphp-portphp": "^2.0.0",
         "phpoffice/phpspreadsheet": "^1.5"
     },
     "autoload": {
